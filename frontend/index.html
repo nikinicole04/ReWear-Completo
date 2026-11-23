@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReWear Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6efe2; --surface:#fdfaf3; --ink:#5b5048; --ink-strong:#4a3f37; --muted:#a99c8a;
+  --cherry:#bd7a72; --cherry-d:#a8655d; --pink:#d9a7a0; --pink-soft:#f1e3dc;
+  --sage:#9aad86; --sage-d:#879a73; --sage-soft:#e8efdf;
+  --lav:#c3b4df; --lav-soft:#ece6f4; --gold:#d6b574; --blue:#9fbbd2;
+  --cream:#f3ecdd; --lilac:#ece6f4; --mint:#e9efe1;
+  --line:#e7dcc8; --line-soft:#efe8d9;
+  --r:20px; --r-sm:14px;
+  --shadow:0 12px 30px -14px rgba(120,95,70,.32);
+  --shadow-sm:0 5px 16px -8px rgba(120,95,70,.26);
+  --sans:'Mulish',system-ui,sans-serif; --display:'Fraunces','Georgia',serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;
+  background-image:radial-gradient(circle at 12% 0%,#faf4e9 0,transparent 42%),radial-gradient(circle at 92% 4%,#f2ece0 0,transparent 40%);
+  background-attachment:fixed;}
+/* doodles dibujados a mano, de fondo */
+.doodles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.doodles svg{position:absolute;opacity:.5}
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;margin:0;line-height:1.15;color:var(--ink)}
+a{color:var(--cherry);text-decoration:none}
+button{font-family:inherit}
+img{max-width:100%}
+
+/* ---- layout ---- */
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px;position:relative;z-index:1}
+.topbar{position:sticky;top:0;z-index:30;background:rgba(246,239,226,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;height:64px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;font-size:25px;letter-spacing:.01em}
+.brand .nm{color:var(--ink-strong)}
+.brand svg{width:28px;height:28px;flex:none}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.nav button{border:1.5px solid var(--line);background:transparent;color:var(--muted);font-weight:700;font-size:13.5px;padding:7px 14px;border-radius:999px;cursor:pointer;transition:.15s}
+.nav button:hover{background:var(--surface);color:var(--ink)}
+.nav button.on{background:var(--sage-soft);color:var(--sage-d);border-color:#cbddb8}
+.nav .saldo{background:var(--surface);border:1.5px solid var(--line);color:var(--cherry);padding:6px 13px;border-radius:999px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:5px}
+.nav .salir{color:var(--muted)}
+
+/* ---- pieces ---- */
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:20px}
+.grid{display:grid;gap:16px}
+.btn{border:0;border-radius:999px;padding:11px 20px;font-weight:800;font-size:15px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn.p{background:var(--sage);color:#fdfbf4;box-shadow:var(--shadow-sm)}
+.btn.p:hover{background:var(--sage-d)}
+.btn.g{background:var(--pink-soft);color:var(--cherry-d)}
+.btn.g:hover{background:#ecd8d0}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:7px 14px;font-size:13px}
+label.f{display:block;margin:0 0 11px;font-weight:700;font-size:14px;color:var(--ink)}
+label.f span{display:block;color:var(--muted);font-weight:600;font-size:12.5px;margin-bottom:4px}
+input,select,textarea{width:100%;font-family:inherit;font-size:15px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink-soft)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:11.5px;padding:3px 10px;border-radius:999px;letter-spacing:.01em}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--pink-soft);color:var(--cherry);border-radius:999px;padding:4px 11px;font-weight:700;font-size:13px}
+.msg{border-radius:var(--r-sm);padding:10px 13px;font-weight:700;font-size:14px;margin-top:4px}
+.msg.ok{background:var(--mint);color:#1f7a53}
+.msg.err{background:#ffe2e6;color:var(--cherry-d)}
+.muted{color:var(--muted)}
+.coin{width:16px;height:16px;display:inline-block;vertical-align:-3px}
+hr.soft{border:0;border-top:1px solid var(--line-soft);margin:16px 0}
+table.data{width:100%;border-collapse:collapse;font-size:14.5px}
+table.data th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+table.data td{padding:10px;border-bottom:1px solid var(--line-soft)}
+
+/* rareza + estado colors */
+.r-Comun{background:#eae3d6;color:#8c7d6b}.r-Raro{background:#e0ebf0;color:#5f87a0}
+.r-Epico{background:#eae3f2;color:#8a6fb0}.r-Legendario{background:#f3e8cf;color:#b19152}
+.tag{border:1px solid rgba(120,95,70,.08)}
+.e-en_revision{background:#f3e8cf;color:#a9823b}.e-disponible{background:var(--sage-soft);color:#5f7a4c}
+.e-reservada{background:#f3e8cf;color:#a9823b}.e-enviada{background:#e0ebf0;color:#5f87a0}.e-entregada{background:var(--sage-soft);color:#5f7a4c}.e-retirada{background:#f1e0dc;color:var(--cherry-d)}.e-cancelada{background:#eae3d6;color:#8c7d6b}
+
+/* prenda card */
+.prenda{overflow:hidden;padding:0;display:flex;flex-direction:column}
+.prenda .foto{height:230px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:15px;color:#fff;position:relative}
+.foto-ht::after{content:none}
+.prenda .body{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.prenda h4{font-size:16px}
+.prenda .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.price{font-family:var(--display);font-weight:700;font-size:19px;color:var(--cherry);display:flex;align-items:center;gap:5px}
+.lock{position:absolute;inset:0;background:rgba(62,34,48,.46);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;gap:6px;flex-direction:column}
+
+/* hero / landing */
+.hero{text-align:center;padding:46px 0 10px;position:relative}
+.hero h1{font-size:clamp(36px,6.4vw,62px);letter-spacing:-.02em}
+.hero h1{font-weight:600}
+.hero h1 em{font-style:italic;color:var(--cherry)}
+.hero p{max-width:560px;margin:16px auto 24px;color:var(--muted);font-size:18px;font-weight:600}
+.hero .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.collage{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:40px 0}
+.collage .chip{width:150px;height:180px;border-radius:var(--r);display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:var(--display);font-weight:600;font-size:15px;box-shadow:var(--shadow);transform:rotate(var(--rot))}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:30px 0 50px}
+.feat .card{text-align:center}
+.feat .em{font-size:30px}
+
+.section-title{display:flex;align-items:center;gap:10px;margin:26px 0 16px}
+.section-title h2{font-size:26px}
+.section-title h2::before{content:"\2726";color:var(--gold);margin-right:9px;font-size:.72em;vertical-align:3px}
+.bignum{color:var(--cherry)}
+.section-title .sub{color:var(--muted);font-weight:700}
+.filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+.filtros .fi{min-width:130px}
+.filtros .fi label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px}
+.filtros select{padding:8px 10px;font-size:14px}
+.chk{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:14px;cursor:pointer;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 13px}
+.chk input{width:auto}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(62,34,48,.4);display:flex;align-items:center;justify-content:center;z-index:50;padding:18px}
+.modal{background:#fff;border-radius:24px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:26px;box-shadow:var(--shadow)}
+.modal .x{float:right;border:0;background:var(--pink-soft);color:var(--cherry);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;font-weight:800}
+.breakdown{background:var(--lilac);border-radius:var(--r-sm);padding:14px 16px;font-weight:700}
+.breakdown .ln{display:flex;justify-content:space-between;padding:3px 0;color:#5a4a6e}
+.breakdown .tot{border-top:1.5px dashed #c9b8ff;margin-top:6px;padding-top:8px;color:var(--ink);font-size:17px}
+
+/* compare bar */
+.cmpbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:9px 10px 9px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);z-index:40;font-weight:700}
+.escalera{display:flex;gap:10px;flex-wrap:wrap}
+.escalera .niv{flex:1;min-width:120px;border-radius:var(--r-sm);padding:12px;text-align:center;border:1.5px solid var(--line)}
+.escalera .niv.off{opacity:.55}
+.bignum{font-family:var(--display);font-weight:700;font-size:40px;color:var(--cherry);line-height:1}
+@media(max-width:560px){.nav .lbl{display:none}.topbar .wrap{height:56px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="vendor/react.min.js"></script>
+<script src="vendor/react-dom.min.js"></script>
+<script src="vendor/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+/* ========== utilidades ========== */
+let TOKEN = localStorage.getItem('rw_token') || '';
+async function api(path, method='GET', body){
+  const h={'Content-Type':'application/json'};
+  if(TOKEN) h.Authorization='Bearer '+TOKEN;
+  const r=await fetch(path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  let d={}; try{d=await r.json();}catch(e){}
+  return {ok:r.ok,status:r.status,data:d};
+}
+const Coin = ({s=16}) => (
+  <svg className="coin" width={s} height={s} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="#ffd36b" stroke="#e8a92c" strokeWidth="1.5"/>
+    <path d="M12 7v10M9 9.5c0-1.1 1.3-2 3-2s3 .9 3 2-1.3 2-3 2-3 .9-3 2 1.3 2 3 2 3-.9 3-2" stroke="#e8a92c" strokeWidth="1.3" strokeLinecap="round"/>
+  </svg>
+);
+const Money = ({n}) => <span className="price"><Coin/>{n}</span>;
+// Logo: un gancho de ropa con el gancho en forma de corazon (cute y legible).
+const Logo = ({c='#c0837b'}) => (
+  <svg viewBox="0 0 48 48" fill="none">
+    <path d="M24 20.5C24 20.5 16 15.4 16 10.8 16 8.4 17.9 6.9 19.9 6.9 21.6 6.9 23.1 8 24 9.6 24.9 8 26.4 6.9 28.1 6.9 30.1 6.9 32 8.4 32 10.8 32 15.4 24 20.5 24 20.5Z" fill={c}/>
+    <path d="M24 20.5 L24 23 M10 33 L24 22.4 L38 33 M8.8 33 H39.2" stroke={c} strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+// Ilustraciones de prenda por categoria (gráficos originales, hacen de "foto").
+const palettes=[{bg:'#f3e3df',ink:'#c98a82'},{bg:'#ece6f4',ink:'#9d87c4'},{bg:'#eaefe0',ink:'#8aa06c'},
+  {bg:'#f1e9da',ink:'#c2a06a'},{bg:'#e3ecf2',ink:'#7f9cb8'},{bg:'#f5e6ec',ink:'#cc8ba6'}];
+const paleta = id => palettes[(id||0) % palettes.length];
+const garments={
+  camiseta:'M30 30 L19 39 L26 48 L31 44 L31 82 L69 82 L69 44 L74 48 L81 39 L70 30 C66 38 59 41 50 41 C41 41 34 38 30 30 Z',
+  chaqueta:'M30 30 L19 39 L26 48 L31 44 L31 82 L47 82 L47 41 C42 40 37 37 34 31 Z M66 31 C63 37 58 40 53 41 L53 82 L69 82 L69 44 L74 48 L81 39 L70 30 Z',
+  vestido:'M36 30 L29 39 L35 47 L39 44 L39 50 L26 84 L74 84 L61 50 L61 44 L65 47 L71 39 L64 30 C60 37 55 40 50 40 C45 40 40 37 36 30 Z',
+  pantalon:'M32 29 L68 29 L66 84 L54 84 L50 52 L46 84 L34 84 Z',
+  zapatos:'M20 64 C20 59 24 56 30 56 L41 56 L48 50 L55 57 L72 61 C78 62 82 65 82 69 L82 72 L20 72 Z',
+  cartera:'M28 46 L72 46 L68 84 L32 84 Z M36 46 C36 32 41 25 50 25 C59 25 64 32 64 46 L59 46 C59 35 55 30 50 30 C45 30 41 35 41 46 Z',
+};
+function artePath(cat){const k=(cat||'').toLowerCase();
+  if(k.includes('camiseta')||k.includes('top')||k.includes('blusa'))return garments.camiseta;
+  if(k.includes('chaqueta'))return garments.chaqueta;
+  if(k.includes('vestido'))return garments.vestido;
+  if(k.includes('pantal')||k.includes('jean'))return garments.pantalon;
+  if(k.includes('zapato')||k.includes('sneaker')||k.includes('calzado'))return garments.zapatos;
+  if(k.includes('cartera')||k.includes('bolso')||k.includes('accesorio'))return garments.cartera;
+  return garments.camiseta;}
+function PrendaArte({categoria,id,imagen}){const p=paleta(id);
+  if(imagen) return (
+    <div style={{height:'100%',width:'100%',overflow:'hidden',background:'#fff',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <img src={imagen} alt={categoria||'prenda'} style={{width:'100%',height:'100%',objectFit:'contain',display:'block',padding:6,boxSizing:'border-box'}}/>
+    </div>
+  );
+  return (
+  <div style={{height:'100%',width:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:p.bg}}>
+    <svg width="50%" viewBox="0 0 100 100" style={{filter:'drop-shadow(0 4px 7px rgba(120,95,70,.14))'}}>
+      <path d={artePath(categoria)} fill={p.ink}/>
+    </svg>
+  </div>
+);}
+const Star = ({c='#d6b574',s=16,style}) => (
+  <svg width={s} height={s} viewBox="0 0 24 24" fill={c} style={style}><path d="M12 0c.7 6.3 5 10.6 12 12-7 1.4-11.3 5.7-12 12-.7-6.3-5-10.6-12-12C7 10.6 11.3 6.3 12 0z"/></svg>
+);
+// Doodles dibujados a mano (ganchos, corazones, ramitas) para el fondo.
+const DL={
+  hanger:'M20 6.2c-1.5 0-2.5 1-2.5 2.3 0 1 .6 1.6 1.3 1.9 M18.8 10.4 L5 19 H35 L21.2 10.4',
+  heart:'M12 20.5C5.5 15.8 3 12 3 8.4 3 5.8 5 4 7.3 4 9 4 10.6 5 11.3 6.4 12 7.8 12.7 7 14.7 6c.7-1.4 2.3-2 4-2C17 4 19 5.8 19 8.4c0 3.6-2.5 7.4-9 12.1Z',
+  sprig:'M6 23C9 14 13 8 21 4 M11 16c-3-1.2-5.2 0-6.2 2.2 M15 10.5c-2.8-1.2-5 0-6 2.2 M18 6.5c-2.4-1-4.3 0-5.2 2',
+};
+const Doodle=({t='hanger',c='#cbb799',w=42,style})=>(
+  <svg width={w} viewBox="0 0 40 28" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={style}><path d={DL[t]}/></svg>
+);
+function Doodles(){return(
+  <div className="doodles">
+    <Doodle t="heart" w={26} style={{top:'10%',left:'4%',transform:'rotate(-8deg)'}}/>
+    <Doodle t="hanger" w={46} style={{top:'22%',left:'7%',transform:'rotate(-12deg)'}}/>
+    <Doodle t="sprig" w={34} style={{top:'52%',left:'3%',transform:'rotate(6deg)'}}/>
+    <Doodle t="heart" w={20} style={{top:'74%',left:'8%'}}/>
+    <Doodle t="hanger" w={40} style={{top:'14%',right:'6%',transform:'rotate(10deg)'}}/>
+    <Doodle t="sprig" w={30} style={{top:'8%',right:'14%',transform:'scaleX(-1) rotate(8deg)'}}/>
+    <Doodle t="heart" w={24} style={{top:'40%',right:'4%',transform:'rotate(10deg)'}}/>
+    <Doodle t="hanger" w={44} style={{bottom:'10%',right:'7%',transform:'rotate(-8deg)'}}/>
+    <Doodle t="sprig" w={32} style={{bottom:'8%',left:'12%',transform:'scaleX(-1)'}}/>
+  </div>
+);}
+const rarezaTag = r => <span className={"tag r-"+(r||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')}>{r}</span>;
+const EST_LBL={en_revision:'en revisión'};
+const estadoTag = e => <span className={"tag e-"+e}>{EST_LBL[e]||e.replace('_',' ')}</span>;
+function Mensaje({m}){ return m ? <div className={"msg "+m.t}>{m.x}</div> : null; }
+
+/* dropdown que muestra nombre y guarda id */
+const Opts = ({lista,vacio='-- elegir --'}) => (
+  <React.Fragment><option value="">{vacio}</option>
+    {lista.map(o=><option key={o.id??o} value={o.id??o}>{o.nombre??o}</option>)}
+  </React.Fragment>
+);
+
+/* ========== LANDING ========== */
+function Landing({onEntrar}){
+  const chips=[['Vestido','-6deg'],['Chaqueta','4deg'],['Pantalón','-3deg'],['Zapatos','6deg']];
+  return <div className="wrap">
+    <div className="hero">
+      <Star c="#cf9a93" s={24} style={{position:'absolute',left:'15%',top:40}}/>
+      <Star c="#9fbbd2" s={17} style={{position:'absolute',right:'17%',top:94}}/>
+      <Star c="#c3b4df" s={15} style={{position:'absolute',right:'27%',top:32}}/>
+      <Doodle t="heart" w={28} c="#cf9a93" style={{position:'absolute',left:'24%',top:150,transform:'rotate(-6deg)'}}/>
+      <div style={{width:78,height:78,margin:'0 auto 8px'}}><Logo/></div>
+      <h1>Tu estilo es tu <em>moneda</em> <Star c="#d6b574" s={30} style={{verticalAlign:'middle'}}/></h1>
+      <p>Dale una segunda vida a lo que ya no usas: ropa, carteras y más. Entrega tus piezas, gana créditos y descubre cosas únicas de la comunidad ReWear.</p>
+      <div className="cta">
+        <button className="btn p" onClick={()=>onEntrar('registro')}>Crear mi cuenta</button>
+        <button className="btn g" onClick={()=>onEntrar('login')}>Ya tengo cuenta</button>
+      </div>
+    </div>
+    <div className="collage">
+      {chips.map(([t,r],i)=><div key={t} className="chip" style={{'--rot':r,background:paleta(i).bg,padding:0,flexDirection:'column',alignItems:'stretch',overflow:'hidden'}}>
+        <div style={{flex:1}}><PrendaArte categoria={t} id={i}/></div>
+        <div style={{padding:'9px 0',textAlign:'center',fontWeight:700,fontSize:15,color:paleta(i).ink,background:'#fff'}}>{t}</div>
+      </div>)}
+    </div>
+    <div className="feat">
+      <div className="card"><div style={{height:34,marginBottom:4}}><Doodle t="hanger" w={46} c="#c58a82"/></div><h3>Entrega</h3><p className="muted">Sube tu prenda y el equipo valida su estado real antes de darte créditos.</p></div>
+      <div className="card"><div style={{height:34,marginBottom:4}}><Doodle t="heart" w={30} c="#cf9a93"/></div><h3>Gana créditos</h3><p className="muted">Cada prenda vale según su categoría, estado y marca. Más un bono de bienvenida.</p></div>
+      <div className="card"><div style={{height:34,marginBottom:4}}><Star c="#d6b574" s={30}/></div><h3>Desbloquea</h3><p className="muted">Sube de nivel y abre drops exclusivos y prendas raras por temporada y estilo.</p></div>
+    </div>
+  </div>;
+}
+
+/* ========== AUTH ========== */
+function Auth({modo,setModo,onOk}){
+  const [f,setF]=useState({correo:'',contrasena:'',nombre:'',apellido:''});
+  const [msg,setMsg]=useState(null);
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  async function enviar(){
+    setMsg(null);
+    const path=modo==='registro'?'/api/registro':'/api/login';
+    const {ok,data}=await api(path,'POST',f);
+    if(!ok) return setMsg({t:'err',x:data.error});
+    onOk(data);
+  }
+  return <div className="wrap" style={{maxWidth:430,marginTop:40}}>
+    <div className="card">
+      <h2 style={{marginBottom:4}}>{modo==='registro'?'Crear cuenta':'Iniciar sesión'}</h2>
+      <p className="muted" style={{marginTop:0,marginBottom:18}}>{modo==='registro'?'Únete a la comunidad de moda circular.':'Qué bueno verte de nuevo.'}</p>
+      {modo==='registro'&&<div style={{display:'flex',gap:10}}>
+        <label className="f" style={{flex:1}}><span>Nombre</span><input value={f.nombre} onChange={e=>set('nombre',e.target.value)}/></label>
+        <label className="f" style={{flex:1}}><span>Apellido</span><input value={f.apellido} onChange={e=>set('apellido',e.target.value)}/></label>
+      </div>}
+      <label className="f"><span>Correo</span><input value={f.correo} onChange={e=>set('correo',e.target.value)} placeholder="tu@correo.com"/></label>
+      <label className="f"><span>Contraseña</span><input type="password" value={f.contrasena} onChange={e=>set('contrasena',e.target.value)}/></label>
+      <button className="btn p" style={{width:'100%',marginTop:6}} onClick={enviar}>{modo==='registro'?'Crear cuenta':'Entrar'}</button>
+      <Mensaje m={msg}/>
+      <p className="muted" style={{textAlign:'center',marginTop:16,marginBottom:0,fontSize:14}}>
+        {modo==='registro'?'¿Ya tienes cuenta? ':'¿No tienes cuenta? '}
+        <a style={{cursor:'pointer',fontWeight:800}} onClick={()=>{setMsg(null);setModo(modo==='registro'?'login':'registro');}}>
+          {modo==='registro'?'Inicia sesión':'Regístrate'}</a>
+      </p>
+    </div>
+    <p className="muted" style={{textAlign:'center',fontSize:13,marginTop:14}}>
+      Demo: admin@rewear.com / admin123 &nbsp;·&nbsp; ana@rewear.com &nbsp;·&nbsp; vale@rewear.com (coleccionista) &nbsp;·&nbsp; clave user123
+    </p>
+  </div>;
+}
+
+/* ========== PANEL USUARIO ========== */
+function Panel({ir}){
+  const [d,setD]=useState(null);
+  useEffect(()=>{api('/api/mi/panel').then(r=>r.ok&&setD(r.data));},[]);
+  if(!d) return <div className="wrap"><p className="muted">Cargando...</p></div>;
+  return <div className="wrap">
+    <div className="section-title"><h2>Hola, {d.usuario.nombre} 💕</h2></div>
+    <div className="grid" style={{gridTemplateColumns:'1.2fr 1fr'}}>
+      <div className="card" style={{background:'linear-gradient(135deg,#fff,#ffe3ea)'}}>
+        <p className="muted" style={{margin:0,fontWeight:700}}>Tu saldo</p>
+        <div style={{display:'flex',alignItems:'center',gap:8,margin:'4px 0'}}><Coin s={30}/><span className="bignum">{d.saldo}</span><span className="muted" style={{fontWeight:700}}>créditos</span></div>
+        {d.reservado>0&&<p className="muted" style={{margin:0}}>{d.reservado} retenidos en reservas</p>}
+        <hr className="soft"/>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          <span className="pill">Nivel {d.nivel.nombre}</span>
+          <span className="pill">Reputación {d.n_valoraciones?d.reputacion:'sin valoraciones'}</span>
+          <span className="pill">{d.mis_prendas.en_stock} en stock</span>
+        </div>
+      </div>
+      <div className="card">
+        <h3 style={{marginBottom:10}}>Escalera de rarezas</h3>
+        <p className="muted" style={{marginTop:0,fontSize:14}}>Se desbloquean según tu saldo.</p>
+        <div className="escalera">
+          {d.rarezas.map(r=><div key={r.id} className={"niv "+(r.desbloqueada?'':'off')}>
+            {rarezaTag(r.nombre)}<div style={{marginTop:6,fontWeight:800,fontSize:13}}>{r.desbloqueada?'Desbloqueada':('desde '+r.saldo_minimo)}</div>
+          </div>)}
+        </div>
+      </div>
+    </div>
+    <div className="section-title" style={{marginTop:26}}><h2 style={{fontSize:20}}>¿Qué quieres hacer?</h2></div>
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))'}}>
+      <button className="card" style={{cursor:'pointer',textAlign:'left'}} onClick={()=>ir('catalogo')}><div className="em" style={{fontSize:26}}>🛍️</div><h3>Explorar catálogo</h3></button>
+      <button className="card" style={{cursor:'pointer',textAlign:'left'}} onClick={()=>ir('entregar')}><div className="em" style={{fontSize:26}}>👗</div><h3>Entregar prenda</h3></button>
+      <button className="card" style={{cursor:'pointer',textAlign:'left'}} onClick={()=>ir('drops')}><div className="em" style={{fontSize:26}}>✨</div><h3>Ver drops</h3></button>
+      <button className="card" style={{cursor:'pointer',textAlign:'left'}} onClick={()=>ir('billetera')}><div className="em" style={{fontSize:26}}>👛</div><h3>Mi billetera</h3></button>
+    </div>
+  </div>;
+}
+
+/* ========== CATALOGO ========== */
+function Catalogo({cat,abrir,cmp,toggleCmp}){
+  const [d,setD]=useState({saldo:0,prendas:[]});
+  const [f,setF]=useState({estilo_id:'',temporada_id:'',talla:'',rareza_id:'',verificada:false});
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  const cargar=()=>{
+    const q=new URLSearchParams();
+    Object.entries(f).forEach(([k,v])=>{ if(v===true)q.set(k,'true'); else if(v)q.set(k,v); });
+    api('/api/catalogo?'+q.toString()).then(r=>r.ok&&setD(r.data));
+  };
+  useEffect(cargar,[f]);
+  const tallas=['XS','S','M','L','XL','28','30','32','34','36','37','38','39','40','41','42'];
+  return <div className="wrap">
+    <div className="section-title"><h2>Catálogo</h2><span className="sub">· {d.prendas.length} prendas</span></div>
+    <div className="filtros">
+      <div className="fi"><label>Estilo</label><select value={f.estilo_id} onChange={e=>set('estilo_id',e.target.value)}><Opts lista={cat.estilos} vacio="Todos"/></select></div>
+      <div className="fi"><label>Temporada</label><select value={f.temporada_id} onChange={e=>set('temporada_id',e.target.value)}><Opts lista={cat.temporadas} vacio="Todas"/></select></div>
+      <div className="fi"><label>Rareza</label><select value={f.rareza_id} onChange={e=>set('rareza_id',e.target.value)}><Opts lista={cat.rarezas} vacio="Todas"/></select></div>
+      <div className="fi"><label>Talla</label><select value={f.talla} onChange={e=>set('talla',e.target.value)}><option value="">Todas</option>{tallas.map(t=><option key={t}>{t}</option>)}</select></div>
+      <label className="chk"><input type="checkbox" checked={f.verificada} onChange={e=>set('verificada',e.target.checked)}/> Solo verificadas</label>
+    </div>
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(210px,1fr))'}}>
+      {d.prendas.map(p=><div key={p.id} className="card prenda">
+        <div className="foto">
+          <PrendaArte categoria={p.categoria} id={p.id} imagen={p.imagen}/>
+          {p.verificada&&<span className="tag" style={{position:'absolute',top:8,left:8,background:'#fff',color:'#1f7a53'}}>✓ Verificada</span>}
+          <span className="tag" style={{position:'absolute',bottom:8,left:8,background:'rgba(255,255,255,.85)',color:'var(--muted)'}}>{p.categoria}</span>
+          {p.bloqueada&&<div className="lock">🔒<span>Necesitas {p.saldo_minimo} cr</span></div>}
+        </div>
+        <div className="body">
+          <h4>{p.titulo}</h4>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{rarezaTag(p.rareza)}<span className="tag" style={{background:'var(--pink-soft)',color:'var(--cherry)'}}>Talla {p.talla}</span></div>
+          <p className="muted" style={{margin:0,fontSize:13}}>{p.estilos} · {p.temporada}</p>
+          <div className="row">
+            <Money n={p.valor}/>
+            <div style={{display:'flex',gap:6}}>
+              <button className={"btn sm "+(cmp.find(c=>c.id===p.id)?'p':'ghost')} title="Comparar" onClick={()=>toggleCmp(p)}>⇄</button>
+              <button className="btn sm g" onClick={()=>abrir(p.id)}>Ver</button>
+            </div>
+          </div>
+        </div>
+      </div>)}
+    </div>
+    {d.prendas.length===0&&<p className="muted">No hay prendas con esos filtros.</p>}
+  </div>;
+}
+
+/* ========== DETALLE ========== */
+function Detalle({id,cerrar,onReservado}){
+  const [p,setP]=useState(null);const [msg,setMsg]=useState(null);const [load,setLoad]=useState(false);
+  const [metodo,setMetodo]=useState('retiro');const [direccion,setDireccion]=useState('');
+  useEffect(()=>{api('/api/prendas/'+id).then(r=>r.ok&&setP(r.data));},[id]);
+  async function reservar(){
+    if(metodo==='envio'&&direccion.trim().length<5){setMsg({t:'err',x:'Escribe tu dirección de envío.'});return;}
+    setLoad(true);setMsg(null);
+    const {ok,data}=await api('/api/prendas/'+id+'/reservar','POST',{metodo_entrega:metodo,direccion});
+    setLoad(false);
+    if(!ok) return setMsg({t:'err',x:data.error});
+    setMsg({t:'ok',x:'¡Reservada! Se retuvieron '+data.retenido+' créditos. Coordina la entrega en Mis reservas.'});
+    onReservado&&onReservado();
+  }
+  if(!p) return null;
+  const base=p.valor_base, est=Math.round(base*p.factor), mar=Math.round(base*p.factor*p.multiplicador);
+  return <div className="overlay" onClick={cerrar}><div className="modal" onClick={e=>e.stopPropagation()}>
+    <button className="x" onClick={cerrar}>×</button>
+    <div style={{height:280,borderRadius:16,overflow:'hidden',marginBottom:14}}><PrendaArte categoria={p.categoria} id={p.id} imagen={p.imagen}/></div>
+    <h2>{p.titulo}</h2>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0 16px'}}>
+      {rarezaTag(p.rareza)}<span className="pill">Talla {p.talla}</span><span className="pill">{p.categoria}</span>
+      {p.verificada&&<span className="tag" style={{background:'var(--mint)',color:'#1f7a53'}}>✓ Verificada</span>}
+    </div>
+    {(p.firma||p.edicion)&&<div className="tag" style={{background:'var(--gold)',color:'#5a4421',marginBottom:10,fontSize:12.5}}>✍️ {[p.firma,p.edicion].filter(Boolean).join(' · ')}</div>}
+    <p className="muted" style={{marginTop:0}}>Estilo {p.estilos} · {p.temporada} · Marca {p.marca} · Color {p.color||'—'} · De {p.dueno}</p>
+    <h3 style={{marginTop:18,marginBottom:8}}>{(p.firma||p.edicion)?'Pieza exclusiva':'Cómo se calcula el valor'}</h3>
+    {(p.firma||p.edicion)?
+    <div className="breakdown">
+      <div className="ln"><span>Edición limitada</span><span>✦</span></div>
+      <div className="ln"><span>Rareza {p.rareza} · cupo para desbloquear</span><span>🔒 {p.saldo_minimo} cr</span></div>
+      <div className="ln tot"><span>Valor de colección</span><span><Coin/> {p.valor} créditos</span></div>
+    </div>
+    :
+    <div className="breakdown">
+      <div className="ln"><span>Valor base ({p.categoria})</span><span>{base}</span></div>
+      <div className="ln"><span>× factor estado ({p.estado_prenda}, {p.factor})</span><span>{est}</span></div>
+      <div className="ln"><span>× multiplicador marca ({p.marca}, {p.multiplicador})</span><span>{mar}</span></div>
+      {p.verificada&&<div className="ln"><span>× 1.2 por verificación</span><span>{p.valor}</span></div>}
+      <div className="ln tot"><span>Valor final</span><span><Coin/> {p.valor} créditos</span></div>
+    </div>}
+    <div style={{marginTop:18}}>
+      {p.es_mia? <p className="muted">Esta es tu prenda.</p> :
+       p.estado!=='disponible'? <p className="muted">Esta prenda ya no está disponible.</p> :
+       <React.Fragment>
+         {p.puedo_reservar&&<div style={{marginBottom:12}}>
+           <label className="f" style={{marginBottom:8}}><span>Método de entrega</span>
+             <div style={{display:'flex',gap:8}}>
+               <button type="button" className={"btn sm "+(metodo==='retiro'?'p':'g')} onClick={()=>setMetodo('retiro')}>Retiro en punto</button>
+               <button type="button" className={"btn sm "+(metodo==='envio'?'p':'g')} onClick={()=>setMetodo('envio')}>Envío a domicilio</button>
+             </div>
+           </label>
+           {metodo==='envio'&&<input placeholder="Tu dirección de envío" value={direccion} onChange={e=>setDireccion(e.target.value)}/>}
+         </div>}
+         <button className="btn p" style={{width:'100%'}} disabled={!p.puedo_reservar||load} onClick={reservar}>
+           {p.bloqueada?('Bloqueada — necesitas '+p.saldo_minimo+' créditos'):p.sin_saldo?('No te alcanza (tienes '+p.saldo+')'):'Reservar por '+p.valor+' créditos'}
+         </button>
+       </React.Fragment>}
+      <Mensaje m={msg}/>
+    </div>
+  </div></div>;
+}
+
+/* ========== COMPARAR ========== */
+function Comparar({items,cerrar}){
+  const filas=[['Rareza','rareza'],['Valor','valor'],['Talla','talla'],['Categoría','categoria'],['Marca','marca'],['Temporada','temporada'],['Estilos','estilos'],['Verificada','verificada']];
+  return <div className="overlay" onClick={cerrar}><div className="modal" style={{maxWidth:640}} onClick={e=>e.stopPropagation()}>
+    <button className="x" onClick={cerrar}>×</button>
+    <h2>Comparar prendas</h2>
+    <table className="data" style={{marginTop:14}}><thead><tr><th></th>{items.map(p=><th key={p.id}>{p.titulo}</th>)}</tr></thead>
+      <tbody>{filas.map(([lbl,k])=><tr key={k}><td style={{fontWeight:800}}>{lbl}</td>
+        {items.map(p=><td key={p.id}>{k==='verificada'?(p[k]?'Sí':'No'):k==='valor'?(p[k]+' cr'):p[k]}</td>)}</tr>)}</tbody>
+    </table>
+  </div></div>;
+}
+
+/* ========== ENTREGAR ========== */
+function Entregar({cat}){
+  const vacio={titulo:'',categoria_id:'',talla:'',estado_id:'',marca_id:'',marca_nueva:'',temporada_id:'',estilo_id:'',rareza_id:'',color:'',imagen:''};
+  const [f,setF]=useState(vacio);const [tallas,setTallas]=useState([]);const [msg,setMsg]=useState(null);
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  useEffect(()=>{ set('talla','');setTallas([]); if(!f.categoria_id)return; let ok=true;
+    api('/api/categorias/'+f.categoria_id+'/tallas').then(r=>{if(ok&&r.ok)setTallas(r.data);}); return()=>{ok=false;};
+  },[f.categoria_id]);
+  async function enviar(){
+    setMsg(null);
+    const payload={titulo:f.titulo,categoria_id:+f.categoria_id,talla:f.talla,estado_id:+f.estado_id,temporada_id:+f.temporada_id,rareza_id:+f.rareza_id,estilos:[+f.estilo_id],color:f.color,imagen:f.imagen};
+    if(f.marca_id==='otra') payload.marca_nueva=f.marca_nueva; else payload.marca_id=+f.marca_id;
+    const {ok,data}=await api('/api/prendas','POST',payload);
+    if(!ok) return setMsg({t:'err',x:data.error});
+    setMsg({t:'ok',x:'¡Prenda enviada! Queda en revisión. Valor estimado: '+data.valor+' cr. Ganarás créditos cuando el equipo la apruebe.'});
+    setF(vacio);setTallas([]);
+  }
+  const marcaOk=f.marca_id&&(f.marca_id!=='otra'||f.marca_nueva.trim().length>=2);
+  const listo=f.titulo&&f.categoria_id&&f.talla&&f.estado_id&&marcaOk&&f.temporada_id&&f.estilo_id&&f.rareza_id;
+  return <div className="wrap" style={{maxWidth:620}}>
+    <div className="section-title"><h2>Entregar una prenda</h2></div>
+    <div className="card">
+      <p className="muted" style={{marginTop:0}}>Todas las referencias se eligen en listas. La talla depende de la categoría que elijas.</p>
+      <label className="f"><span>Título</span><input value={f.titulo} onChange={e=>set('titulo',e.target.value)} placeholder="Ej: Chaqueta de jean vintage"/></label>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Categoría</span><select value={f.categoria_id} onChange={e=>set('categoria_id',e.target.value)}><Opts lista={cat.categorias}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Talla (según categoría)</span><select value={f.talla} disabled={!f.categoria_id} onChange={e=>set('talla',e.target.value)}><option value="">{f.categoria_id?'-- elegir --':'elige categoría primero'}</option>{tallas.map(t=><option key={t}>{t}</option>)}</select></label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Estado</span><select value={f.estado_id} onChange={e=>set('estado_id',e.target.value)}><Opts lista={cat.estados}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Marca</span>
+          <select value={f.marca_id} onChange={e=>set('marca_id',e.target.value)}><Opts lista={cat.marcas}/><option value="otra">Otra marca...</option></select>
+          {f.marca_id==='otra'&&<input style={{marginTop:8}} placeholder="Escribe tu marca" value={f.marca_nueva} onChange={e=>set('marca_nueva',e.target.value)}/>}
+        </label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Temporada</span><select value={f.temporada_id} onChange={e=>set('temporada_id',e.target.value)}><Opts lista={cat.temporadas}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Estilo</span><select value={f.estilo_id} onChange={e=>set('estilo_id',e.target.value)}><Opts lista={cat.estilos}/></select></label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Rareza (provisional)</span><select value={f.rareza_id} onChange={e=>set('rareza_id',e.target.value)}><Opts lista={cat.rarezas}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Color</span><input value={f.color} onChange={e=>set('color',e.target.value)}/></label>
+      </div>
+      <label className="f"><span>Foto (enlace de imagen, opcional)</span><input value={f.imagen} onChange={e=>set('imagen',e.target.value)} placeholder="https://..."/></label>
+      <button className="btn p" disabled={!listo} onClick={enviar}>Enviar para validación</button>
+      <Mensaje m={msg}/>
+    </div>
+  </div>;
+}
+
+/* ========== MIS PRENDAS ========== */
+function MisPrendas(){
+  const [l,setL]=useState([]);
+  useEffect(()=>{api('/api/mis-prendas').then(r=>r.ok&&setL(r.data));},[]);
+  return <div className="wrap">
+    <div className="section-title"><h2>Mis prendas</h2></div>
+    {l.length===0&&<p className="muted">Todavía no has entregado prendas.</p>}
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))'}}>
+      {l.map(p=><div key={p.id} className="card"><div style={{display:'flex',justifyContent:'space-between',gap:8}}><h4>{p.titulo}</h4>{estadoTag(p.estado)}</div>
+        <p className="muted" style={{margin:'6px 0 0',fontSize:14}}>{p.categoria} · Talla {p.talla} · {p.rareza}</p>
+        <div style={{marginTop:8}}><Money n={p.valor}/></div></div>)}
+    </div>
+  </div>;
+}
+
+/* ========== MIS RESERVAS ========== */
+/* seguimiento visual del pedido */
+function Tracker({estado}){
+  if(estado==='cancelada') return <div style={{margin:'8px 0'}}>{estadoTag('cancelada')}</div>;
+  const pasos=['reservada','enviada','entregada'];const i=pasos.indexOf(estado);
+  return <div style={{display:'flex',alignItems:'center',gap:4,margin:'10px 0'}}>
+    {pasos.map((p,k)=><React.Fragment key={p}>
+      <div style={{textAlign:'center'}}>
+        <div style={{width:16,height:16,borderRadius:'50%',margin:'0 auto 2px',background:k<=i?'var(--sage)':'var(--line)'}}></div>
+        <span style={{fontSize:10.5,color:k<=i?'var(--sage-d)':'var(--muted)',fontWeight:700}}>{p}</span>
+      </div>
+      {k<pasos.length-1&&<div style={{height:2,flex:1,background:k<i?'var(--sage)':'var(--line)'}}></div>}
+    </React.Fragment>)}
+  </div>;
+}
+/* chat comprador <-> dueno de una reserva */
+function Chat({solicitudId}){
+  const [d,setD]=useState({yo:null,mensajes:[]});const [txt,setTxt]=useState('');
+  const cargar=()=>api('/api/solicitudes/'+solicitudId+'/mensajes').then(r=>r.ok&&setD(r.data));
+  useEffect(()=>{cargar();},[solicitudId]);
+  async function enviar(){ if(!txt.trim())return; const {ok}=await api('/api/solicitudes/'+solicitudId+'/mensajes','POST',{texto:txt}); if(ok){setTxt('');cargar();} }
+  return <div style={{marginTop:10,background:'var(--bg)',borderRadius:12,padding:10}}>
+    <div style={{maxHeight:150,overflowY:'auto',display:'flex',flexDirection:'column',gap:6,marginBottom:8}}>
+      {d.mensajes.length===0&&<p className="muted" style={{fontSize:13,margin:0}}>Escribe para coordinar la entrega: dónde, cuándo y cómo.</p>}
+      {d.mensajes.map(m=><div key={m.id} style={{alignSelf:m.emisor_id===d.yo?'flex-end':'flex-start',background:m.emisor_id===d.yo?'var(--sage-soft)':'#fff',border:'1px solid var(--line)',borderRadius:10,padding:'5px 10px',maxWidth:'82%',fontSize:13.5}}>
+        <b style={{fontSize:10.5,color:'var(--muted)',display:'block'}}>{m.emisor} · {m.fecha}</b>{m.texto}</div>)}
+    </div>
+    <div style={{display:'flex',gap:6}}>
+      <input value={txt} onChange={e=>setTxt(e.target.value)} onKeyDown={e=>e.key==='Enter'&&enviar()} placeholder="Escribe un mensaje..." style={{fontSize:14}}/>
+      <button className="btn g sm" onClick={enviar}>Enviar</button>
+    </div>
+  </div>;
+}
+
+/* MIS RESERVAS (lo que estoy comprando) */
+function MisReservas(){
+  const [l,setL]=useState([]);const [msg,setMsg]=useState({});const [val,setVal]=useState({});const [chat,setChat]=useState(null);
+  const cargar=()=>api('/api/mis-reservas').then(r=>r.ok&&setL(r.data));
+  useEffect(()=>{cargar();},[]);
+  async function accion(id,url,okMsg){ const {ok,data}=await api('/api/solicitudes/'+id+url,'POST');
+    setMsg(m=>({...m,[id]:ok?{t:'ok',x:okMsg(data)}:{t:'err',x:data.error}})); cargar(); }
+  async function valorar(id){ const p=val[id]||5; const {ok,data}=await api('/api/solicitudes/'+id+'/valorar','POST',{puntaje:+p});
+    setMsg(m=>({...m,[id]:ok?{t:'ok',x:'¡Gracias por tu valoración!'}:{t:'err',x:data.error}})); cargar(); }
+  return <div className="wrap">
+    <div className="section-title"><h2>Mis reservas</h2><span className="sub">· lo que estoy comprando</span></div>
+    {l.length===0&&<p className="muted">No tienes reservas todavía. Reserva algo desde el catálogo.</p>}
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))'}}>
+      {l.map(s=><div key={s.id} className="card">
+        <div style={{display:'flex',justifyContent:'space-between',gap:8}}><h4>{s.titulo}</h4>{estadoTag(s.estado)}</div>
+        <p className="muted" style={{margin:'6px 0 0',fontSize:14}}>De {s.dueno} · Talla {s.talla} · {rarezaTag(s.rareza)}</p>
+        <Tracker estado={s.estado}/>
+        <p className="muted" style={{margin:0,fontSize:13}}>{s.metodo_entrega==='envio'?('Envío a: '+(s.direccion||'—')):'Retiro en punto'} · <Money n={s.monto}/></p>
+        {s.estado==='reservada'&&<p className="muted" style={{fontSize:12.5,marginTop:6}}>Esperando que el dueño marque el envío. Coordina por el chat.</p>}
+        {['reservada','enviada'].includes(s.estado)&&<div style={{display:'flex',gap:6,marginTop:10,flexWrap:'wrap'}}>
+          <button className="btn g sm" onClick={()=>setChat(chat===s.id?null:s.id)}>{chat===s.id?'Ocultar chat':'Chat'}</button>
+          {s.estado==='enviada'&&<button className="btn p sm" onClick={()=>accion(s.id,'/confirmar',d=>'¡Recibida! Se transfirieron '+d.transferido+' créditos al dueño.')}>Confirmar recepción</button>}
+          <button className="btn ghost sm" onClick={()=>accion(s.id,'/cancelar',d=>'Cancelada. Se te devolvieron '+d.reembolsado+' créditos.')}>Cancelar</button>
+        </div>}
+        {chat===s.id&&<Chat solicitudId={s.id}/>}
+        {s.estado==='entregada'&&!s.valorada&&<div style={{marginTop:10,display:'flex',gap:8,alignItems:'center'}}>
+          <select style={{width:70}} value={val[s.id]||5} onChange={e=>setVal(v=>({...v,[s.id]:e.target.value}))}>{[5,4,3,2,1].map(n=><option key={n} value={n}>{n} ★</option>)}</select>
+          <button className="btn g sm" onClick={()=>valorar(s.id)}>Valorar</button>
+        </div>}
+        {s.valorada&&<p className="muted" style={{marginTop:8,fontSize:13}}>Ya valorada ★</p>}
+        <Mensaje m={msg[s.id]}/>
+      </div>)}
+    </div>
+  </div>;
+}
+
+/* VENTAS (reservas de mis prendas; soy el dueno) */
+function Ventas(){
+  const [l,setL]=useState([]);const [msg,setMsg]=useState({});const [chat,setChat]=useState(null);
+  const cargar=()=>api('/api/mis-ventas').then(r=>r.ok&&setL(r.data));
+  useEffect(()=>{cargar();},[]);
+  async function accion(id,url,okMsg){ const {ok,data}=await api('/api/solicitudes/'+id+url,'POST');
+    setMsg(m=>({...m,[id]:ok?{t:'ok',x:okMsg(data)}:{t:'err',x:data.error}})); cargar(); }
+  return <div className="wrap">
+    <div className="section-title"><h2>Ventas</h2><span className="sub">· reservas de mis prendas</span></div>
+    {l.length===0&&<p className="muted">Nadie ha reservado tus prendas todavía.</p>}
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))'}}>
+      {l.map(s=><div key={s.id} className="card">
+        <div style={{display:'flex',justifyContent:'space-between',gap:8}}><h4>{s.titulo}</h4>{estadoTag(s.estado)}</div>
+        <p className="muted" style={{margin:'6px 0 0',fontSize:14}}>Comprador: {s.comprador} · Talla {s.talla}</p>
+        <Tracker estado={s.estado}/>
+        <p className="muted" style={{margin:0,fontSize:13}}>{s.metodo_entrega==='envio'?('Enviar a: '+(s.direccion||'—')):'Retiro en punto'} · recibirás <Money n={s.monto}/></p>
+        {['reservada','enviada'].includes(s.estado)&&<div style={{display:'flex',gap:6,marginTop:10,flexWrap:'wrap',alignItems:'center'}}>
+          <button className="btn g sm" onClick={()=>setChat(chat===s.id?null:s.id)}>{chat===s.id?'Ocultar chat':'Chat'}</button>
+          {s.estado==='reservada'&&<button className="btn p sm" onClick={()=>accion(s.id,'/enviar',()=>'Marcada como enviada. El comprador debe confirmar la recepción.')}>Marcar enviada/entregada</button>}
+          {s.estado==='enviada'&&<span className="muted" style={{fontSize:13}}>Esperando que el comprador confirme.</span>}
+          <button className="btn ghost sm" onClick={()=>accion(s.id,'/cancelar',d=>'Cancelada. Se devolvieron '+d.reembolsado+' créditos al comprador.')}>Cancelar</button>
+        </div>}
+        {chat===s.id&&<Chat solicitudId={s.id}/>}
+        <Mensaje m={msg[s.id]}/>
+      </div>)}
+    </div>
+  </div>;
+}
+
+/* ========== BILLETERA ========== */
+function Billetera(){
+  const [d,setD]=useState(null);
+  useEffect(()=>{api('/api/billetera').then(r=>r.ok&&setD(r.data));},[]);
+  if(!d) return null;
+  const tipo={bono:'Bono de bienvenida',abono:'Abono por prenda',descuento:'Reserva (retenido)',reembolso:'Reembolso'};
+  return <div className="wrap">
+    <div className="section-title"><h2>Mi billetera</h2></div>
+    <div className="grid" style={{gridTemplateColumns:'1fr 1fr',maxWidth:460,marginBottom:18}}>
+      <div className="card"><p className="muted" style={{margin:0,fontWeight:700}}>Disponible</p><div style={{display:'flex',alignItems:'center',gap:6}}><Coin s={24}/><span className="bignum" style={{fontSize:30}}>{d.saldo}</span></div></div>
+      <div className="card"><p className="muted" style={{margin:0,fontWeight:700}}>Retenido</p><div style={{display:'flex',alignItems:'center',gap:6}}><Coin s={24}/><span className="bignum" style={{fontSize:30}}>{d.reservado}</span></div></div>
+    </div>
+    <div className="card">
+      <h3 style={{marginBottom:10}}>Movimientos</h3>
+      <table className="data"><thead><tr><th>Fecha</th><th>Tipo</th><th>Prenda</th><th style={{textAlign:'right'}}>Monto</th></tr></thead>
+        <tbody>{d.movimientos.map(m=><tr key={m.id}><td className="muted">{m.fecha}</td><td>{tipo[m.tipo]||m.tipo}</td><td>{m.prenda||'—'}</td>
+          <td style={{textAlign:'right',fontWeight:800,color:m.tipo==='descuento'?'var(--cherry)':'#1f7a53'}}>{m.tipo==='descuento'?'−':'+'}{m.monto}</td></tr>)}</tbody></table>
+      {d.movimientos.length===0&&<p className="muted">Sin movimientos aún.</p>}
+    </div>
+  </div>;
+}
+
+/* ========== DROPS ========== */
+function Drops({abrir}){
+  const [d,setD]=useState(null);
+  useEffect(()=>{api('/api/drops').then(r=>r.ok&&setD(r.data));},[]);
+  if(!d) return null;
+  return <div className="wrap">
+    <div style={{background:'linear-gradient(90deg,#f6e8c8,#f1e3dc)',border:'1.5px solid var(--gold)',borderRadius:16,padding:'14px 18px',margin:'2px 0 16px',display:'flex',alignItems:'center',gap:13}}>
+      <span style={{fontSize:28}}>✨</span>
+      <div><b style={{fontSize:16.5,color:'var(--ink-strong)'}}>¡NUEVO DROP YA DISPONIBLE!</b><br/><span className="muted" style={{fontWeight:600}}>Piezas Exclusivas — joyitas muy especiales, por tiempo limitado ⭐️</span></div>
+    </div>
+    <div className="section-title"><h2>Drops exclusivos</h2><span className="sub">· tu nivel: {d.nivel.nombre}</span></div>
+    <p className="muted" style={{marginTop:-8,maxWidth:660}}>Piezas <b>únicas</b> que no están en el catálogo. Cada una se <b>desbloquea cuando tienes el cupo de créditos</b> de su rareza. Si tienes el saldo, puedes solicitarla como cualquier prenda.</p>
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))'}}>
+      {d.drops.map(c=><div key={c.id} className="card" style={{border:c.accesible?'1.5px solid var(--gold)':'1px solid var(--line-soft)',opacity:c.accesible?1:.8,background:c.accesible?'linear-gradient(180deg,#fffdf6,var(--surface))':'var(--surface)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',gap:8,alignItems:'center'}}>
+          <h3 style={{display:'flex',alignItems:'center',gap:7}}><Star c="#d6b574" s={16}/>{c.nombre}</h3>
+          {c.accesible?<span className="tag e-disponible">Abierto</span>:<span className="tag" style={{background:'#eae3d6',color:'#8c7d6b'}}>🔒 {c.nivel_min}</span>}
+        </div>
+        <p className="muted" style={{margin:'6px 0 10px',fontSize:13.5}}>{c.temporada} · {c.estilo} · exclusivo nivel {c.nivel_min} · hasta {c.termina_en}</p>
+        {c.accesible? (c.prendas.length? <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {c.prendas.map(p=><button key={p.id} onClick={()=>abrir(p.id)} style={{textAlign:'left',background:'var(--bg)',border:'1px solid var(--line)',borderRadius:12,padding:'10px 12px',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
+              <span style={{display:'flex',alignItems:'center',gap:10}}>
+                {p.imagen&&<img src={p.imagen} alt={p.titulo} style={{width:46,height:54,objectFit:'cover',borderRadius:8,flex:'none'}}/>}
+                <span><b>{p.titulo}</b><br/><span className="muted" style={{fontSize:13}}>Talla {p.talla}</span> {rarezaTag(p.rareza)}{(p.firma||p.edicion)&&<br/>}{(p.firma||p.edicion)&&<span style={{fontSize:11.5,color:'#b6893c',fontWeight:800}}>✍️ {[p.firma,p.edicion].filter(Boolean).join(' · ')}</span>}</span>
+              </span><Money n={p.valor}/></button>)}
+          </div>
+          : <p className="muted" style={{fontSize:14}}>Agotado por ahora. Vuelve pronto.</p>)
+        : <p className="muted" style={{fontSize:14,margin:0}}>Pieza exclusiva. Sube a nivel <b>{c.nivel_min}</b> completando intercambios y con buenas valoraciones para desbloquearla.</p>}
+      </div>)}
+    </div>
+  </div>;
+}
+
+/* ========== ADMIN ========== */
+function AdminValidacion({cat}){
+  const [l,setL]=useState([]);const [f,setF]=useState({});const [msg,setMsg]=useState({});
+  const cargar=()=>api('/api/admin/prendas?estado=en_revision').then(r=>{if(r.ok){setL(r.data);
+    const o={};r.data.forEach(p=>o[p.id]={estado_id:p.estado_id,rareza_id:p.rareza_id,autentica:true,notas:''});setF(o);}});
+  useEffect(()=>{cargar();},[]);
+  const set=(id,k,v)=>setF(x=>({...x,[id]:{...x[id],[k]:v}}));
+  async function validar(id,resultado){ const x=f[id];
+    const {ok,data}=await api('/api/admin/prendas/'+id+'/validar','POST',{resultado,estado_id:+x.estado_id,rareza_id:+x.rareza_id,autentica:resultado==='aprobada'?!!x.autentica:false,notas:x.notas});
+    setMsg(m=>({...m,[id]:ok?{t:'ok',x:resultado==='aprobada'?('Aprobada: '+data.creditos_abonados+' créditos'+(data.bono_bienvenida?' + bono '+data.bono_bienvenida:'')):'Rechazada, sin créditos.'}:{t:'err',x:data.error}}));
+    setTimeout(cargar,1200); }
+  return <div className="wrap">
+    <div className="section-title"><h2>Validación</h2><span className="sub">· {l.length} en revisión</span></div>
+    <p className="muted" style={{marginTop:-8}}>El servidor calcula los créditos. La página nunca manda un monto.</p>
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))'}}>
+      {l.map(p=>f[p.id]&&<div key={p.id} className="card">
+        <h4>{p.titulo}</h4><p className="muted" style={{margin:'4px 0 10px',fontSize:14}}>{p.dueno} · {p.categoria} · Talla {p.talla} · {p.marca}</p>
+        <label className="f"><span>Estado real</span><select value={f[p.id].estado_id} onChange={e=>set(p.id,'estado_id',e.target.value)}><Opts lista={cat.estados}/></select></label>
+        <label className="f"><span>Rareza</span><select value={f[p.id].rareza_id} onChange={e=>set(p.id,'rareza_id',e.target.value)}><Opts lista={cat.rarezas}/></select></label>
+        <label className="chk" style={{marginBottom:10}}><input type="checkbox" checked={f[p.id].autentica} onChange={e=>set(p.id,'autentica',e.target.checked)}/> Auténtica (×1.2)</label>
+        <input placeholder="Notas (obligatorio si rechazas)" value={f[p.id].notas} onChange={e=>set(p.id,'notas',e.target.value)} style={{marginBottom:10}}/>
+        <div style={{display:'flex',gap:8}}><button className="btn p sm" onClick={()=>validar(p.id,'aprobada')}>Aprobar</button><button className="btn g sm" onClick={()=>validar(p.id,'rechazada')}>Rechazar</button></div>
+        <Mensaje m={msg[p.id]}/>
+      </div>)}
+    </div>
+    {l.length===0&&<p className="muted">No hay prendas en revisión.</p>}
+  </div>;
+}
+function AdminRegistrar({cat}){
+  const vacio={dueno_id:'',titulo:'',categoria_id:'',talla:'',estado_id:'',marca_id:'',temporada_id:'',estilo_id:'',coleccion_id:'',rareza_id:'',color:'',imagen:'',firma:'',edicion:''};
+  const [f,setF]=useState(vacio);const [tallas,setTallas]=useState([]);const [cols,setCols]=useState([]);const [msg,setMsg]=useState(null);
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  useEffect(()=>{set('talla','');setTallas([]);if(!f.categoria_id)return;let ok=true;api('/api/categorias/'+f.categoria_id+'/tallas').then(r=>{if(ok&&r.ok)setTallas(r.data);});return()=>{ok=false;};},[f.categoria_id]);
+  useEffect(()=>{set('coleccion_id','');setCols([]);if(!f.temporada_id||!f.estilo_id)return;let ok=true;api('/api/colecciones/buscar?temporada_id='+f.temporada_id+'&estilo_id='+f.estilo_id).then(r=>{if(ok&&r.ok)setCols(r.data);});return()=>{ok=false;};},[f.temporada_id,f.estilo_id]);
+  async function enviar(){setMsg(null);
+    const {ok,data}=await api('/api/admin/prendas','POST',{...f,dueno_id:+f.dueno_id,categoria_id:+f.categoria_id,estado_id:+f.estado_id,marca_id:+f.marca_id,temporada_id:+f.temporada_id,rareza_id:+f.rareza_id,estilos:[+f.estilo_id],coleccion_id:f.coleccion_id?+f.coleccion_id:null});
+    if(ok){setMsg({t:'ok',x:'Prenda '+data.id+' registrada en revisión. Valor estimado: '+data.valor});setF(vacio);}else setMsg({t:'err',x:data.error});}
+  const listo=f.dueno_id&&f.titulo&&f.categoria_id&&f.talla&&f.estado_id&&f.marca_id&&f.temporada_id&&f.estilo_id&&f.rareza_id;
+  return <div className="wrap" style={{maxWidth:620}}><div className="section-title"><h2>Registrar prenda</h2></div>
+    <p className="muted" style={{marginTop:-8}}>Para piezas que consigue la plataforma (drops y exclusivas, ej. ediciones limitadas) o ropa recibida en un punto físico (intake). Los usuarios suben su propia ropa desde "Entregar".</p>
+    <div className="card">
+      <label className="f"><span>Usuario dueño</span><select value={f.dueno_id} onChange={e=>set('dueno_id',e.target.value)}><Opts lista={cat.usuarios}/></select></label>
+      <label className="f"><span>Título</span><input value={f.titulo} onChange={e=>set('titulo',e.target.value)}/></label>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Categoría</span><select value={f.categoria_id} onChange={e=>set('categoria_id',e.target.value)}><Opts lista={cat.categorias}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Talla (según categoría)</span><select value={f.talla} disabled={!f.categoria_id} onChange={e=>set('talla',e.target.value)}><option value="">{f.categoria_id?'-- elegir --':'elige categoría'}</option>{tallas.map(t=><option key={t}>{t}</option>)}</select></label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Estado</span><select value={f.estado_id} onChange={e=>set('estado_id',e.target.value)}><Opts lista={cat.estados}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Marca</span><select value={f.marca_id} onChange={e=>set('marca_id',e.target.value)}><Opts lista={cat.marcas}/></select></label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Temporada</span><select value={f.temporada_id} onChange={e=>set('temporada_id',e.target.value)}><Opts lista={cat.temporadas}/></select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Estilo</span><select value={f.estilo_id} onChange={e=>set('estilo_id',e.target.value)}><Opts lista={cat.estilos}/></select></label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Drop (segun temporada+estilo)</span><select value={f.coleccion_id} disabled={!f.temporada_id||!f.estilo_id} onChange={e=>set('coleccion_id',e.target.value)}><option value="">{cols.length?'-- ninguno --':'sin drops'}</option>{cols.map(c=><option key={c.id} value={c.id}>{c.nombre}</option>)}</select></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Rareza</span><select value={f.rareza_id} onChange={e=>set('rareza_id',e.target.value)}><Opts lista={cat.rarezas}/></select></label>
+      </div>
+      <label className="f"><span>Color</span><input value={f.color} onChange={e=>set('color',e.target.value)}/></label>
+      <label className="f"><span>Foto (enlace de imagen)</span><input value={f.imagen} onChange={e=>set('imagen',e.target.value)} placeholder="https://..."/></label>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Firma / autor (exclusivas)</span><input value={f.firma} onChange={e=>set('firma',e.target.value)} placeholder="Ej: Firmada por …"/></label>
+        <label className="f" style={{flex:1,minWidth:160}}><span>Edición (exclusivas)</span><input value={f.edicion} onChange={e=>set('edicion',e.target.value)} placeholder="Ej: 1 de 1"/></label>
+      </div>
+      <button className="btn p" disabled={!listo} onClick={enviar}>Registrar para validación</button>
+      <Mensaje m={msg}/>
+    </div></div>;
+}
+function AdminParametros({cat,recargar}){
+  const defs=[{t:'rarezas',campo:'saldo_minimo',titulo:'Rarezas: saldo mínimo',datos:cat.rarezas},
+    {t:'estados',campo:'factor',titulo:'Estados: factor (0 a 1)',datos:cat.estados},
+    {t:'marcas',campo:'multiplicador',titulo:'Marcas: multiplicador',datos:cat.marcas},
+    {t:'categorias',campo:'valor_base',titulo:'Categorías: valor base',datos:cat.categorias}];
+  const [vals,setVals]=useState({});const [msg,setMsg]=useState({});
+  useEffect(()=>{const v={};defs.forEach(d=>d.datos.forEach(r=>v[d.t+r.id]=r[d.campo]));setVals(v);},[cat]);
+  async function guardar(d,r){const k=d.t+r.id;const {ok,data}=await api('/api/admin/parametros/'+d.t+'/'+r.id,'PUT',{valor:vals[k]===''?null:Number(vals[k])});
+    setMsg(m=>({...m,[k]:ok?{t:'ok',x:'Guardado: '+data.valor}:{t:'err',x:data.error}}));if(ok)recargar();}
+  return <div className="wrap"><div className="section-title"><h2>Parámetros del Core</h2></div>
+    <p className="muted" style={{marginTop:-8}}>Cada valor se valida en el servidor antes de guardar.</p>
+    <div className="grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))'}}>
+      {defs.map(d=><div key={d.t} className="card"><h3 style={{marginBottom:10}}>{d.titulo}</h3>
+        {d.datos.map(r=><div key={r.id} style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+          <span style={{flex:1,fontWeight:700}}>{r.nombre}</span>
+          <input type="number" step="any" style={{width:90}} value={vals[d.t+r.id]??''} onChange={e=>setVals(v=>({...v,[d.t+r.id]:e.target.value}))}/>
+          <button className="btn g sm" onClick={()=>guardar(d,r)}>OK</button>
+        </div>)}
+        {d.datos.map(r=>msg[d.t+r.id]&&<Mensaje key={'m'+r.id} m={msg[d.t+r.id]}/>)}
+      </div>)}
+    </div></div>;
+}
+function AdminDrops({cat}){
+  const vacio={nombre:'',nivel_min_id:'',temporada_id:'',estilo_id:'',inicia_en:'',termina_en:''};
+  const [f,setF]=useState(vacio);const [l,setL]=useState([]);const [msg,setMsg]=useState(null);
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  const cargar=()=>api('/api/admin/colecciones').then(r=>r.ok&&setL(r.data));
+  useEffect(()=>{cargar();},[]);
+  async function crear(){const {ok,data}=await api('/api/admin/colecciones','POST',{...f,nivel_min_id:+f.nivel_min_id,temporada_id:+f.temporada_id,estilo_id:+f.estilo_id});
+    if(ok){setMsg({t:'ok',x:'Drop creado: '+data.nombre});setF(vacio);cargar();}else setMsg({t:'err',x:data.error});}
+  return <div className="wrap"><div className="section-title"><h2>Drops</h2></div>
+    <div className="card" style={{marginBottom:16}}>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:2,minWidth:180}}><span>Nombre</span><input value={f.nombre} onChange={e=>set('nombre',e.target.value)}/></label>
+        <label className="f" style={{flex:1,minWidth:130}}><span>Nivel mínimo</span><select value={f.nivel_min_id} onChange={e=>set('nivel_min_id',e.target.value)}><Opts lista={cat.niveles}/></select></label>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <label className="f" style={{flex:1,minWidth:130}}><span>Temporada</span><select value={f.temporada_id} onChange={e=>set('temporada_id',e.target.value)}><Opts lista={cat.temporadas}/></select></label>
+        <label className="f" style={{flex:1,minWidth:130}}><span>Estilo</span><select value={f.estilo_id} onChange={e=>set('estilo_id',e.target.value)}><Opts lista={cat.estilos}/></select></label>
+        <label className="f" style={{flex:1,minWidth:130}}><span>Inicia</span><input type="date" value={f.inicia_en} onChange={e=>set('inicia_en',e.target.value)}/></label>
+        <label className="f" style={{flex:1,minWidth:130}}><span>Termina</span><input type="date" value={f.termina_en} onChange={e=>set('termina_en',e.target.value)}/></label>
+      </div>
+      <button className="btn p" onClick={crear}>Crear drop</button><Mensaje m={msg}/>
+    </div>
+    <table className="data"><thead><tr><th>Drop</th><th>Nivel</th><th>Temporada</th><th>Estilo</th><th>Vigencia</th></tr></thead>
+      <tbody>{l.map(c=><tr key={c.id}><td style={{fontWeight:700}}>{c.nombre}</td><td>{c.nivel_min}</td><td>{c.temporada}</td><td>{c.estilo}</td><td className="muted">{c.inicia_en} a {c.termina_en}</td></tr>)}</tbody></table>
+  </div>;
+}
+function AdminUsuarios(){
+  const [l,setL]=useState([]);
+  useEffect(()=>{api('/api/admin/usuarios').then(r=>r.ok&&setL(r.data));},[]);
+  return <div className="wrap"><div className="section-title"><h2>Usuarios</h2></div>
+    <p className="muted" style={{marginTop:-8}}>Los usuarios se registran por su cuenta y entregan sus propias prendas. Aquí solo puedes consultarlos.</p>
+    <table className="data"><thead><tr><th>Correo</th><th>Nombre</th><th>Rol</th><th style={{textAlign:'right'}}>Saldo</th></tr></thead>
+      <tbody>{l.map(u=><tr key={u.id}><td>{u.correo}</td><td>{u.nombre} {u.apellido}</td><td>{u.rol}</td><td style={{textAlign:'right',fontWeight:800}}>{u.saldo}</td></tr>)}</tbody></table>
+  </div>;
+}
+
+/* ========== APP ========== */
+function App(){
+  const [usuario,setUsuario]=useState(JSON.parse(localStorage.getItem('rw_user')||'null'));
+  const [authModo,setAuthModo]=useState(null);
+  const [view,setView]=useState('panel');
+  const [cat,setCat]=useState(null);
+  const [detalle,setDetalle]=useState(null);
+  const [cmp,setCmp]=useState([]);
+  const [verCmp,setVerCmp]=useState(false);
+  const [saldo,setSaldo]=useState(null);
+
+  const esAdmin = usuario&&usuario.rol==='admin';
+  function sesionOk(data){ TOKEN=data.token; localStorage.setItem('rw_token',TOKEN); localStorage.setItem('rw_user',JSON.stringify(data.usuario));
+    setUsuario(data.usuario); setAuthModo(null); setView(data.usuario.rol==='admin'?'validacion':'panel'); }
+  function salir(){ api('/api/logout','POST'); TOKEN=''; localStorage.removeItem('rw_token'); localStorage.removeItem('rw_user'); setUsuario(null); setCat(null); setAuthModo(null); }
+  function recargarCat(){ api('/api/catalogos').then(r=>{ if(r.ok)setCat(r.data); else if(r.status===401)salir(); }); }
+  function refrescarSaldo(){ if(usuario&&usuario.rol==='user') api('/api/mi/panel').then(r=>r.ok&&setSaldo(r.data.saldo)); }
+  useEffect(()=>{ if(usuario){ recargarCat(); refrescarSaldo(); } },[usuario]);
+  function toggleCmp(p){ setCmp(c=>c.find(x=>x.id===p.id)?c.filter(x=>x.id!==p.id):(c.length>=3?c:[...c,p])); }
+
+  // --- sin sesion ---
+  if(!usuario){
+    return <div>
+      <Doodles/>
+      <div className="topbar"><div className="wrap"><div className="brand"><Logo/><span className="nm">ReWear</span></div>
+        <div className="nav"><button onClick={()=>setAuthModo('login')}>Ingresar</button><button className="on" onClick={()=>setAuthModo('registro')}>Crear cuenta</button></div></div></div>
+      {authModo? <Auth modo={authModo} setModo={setAuthModo} onOk={sesionOk}/> : <Landing onEntrar={setAuthModo}/>}
+    </div>;
+  }
+
+  const navUser=[['panel','Panel'],['catalogo','Catálogo'],['drops','Drops'],['entregar','Entregar'],['misprendas','Mis prendas'],['reservas','Mis reservas'],['ventas','Ventas'],['billetera','Billetera']];
+  const navAdmin=[['validacion','Validación'],['registrar','Registrar'],['parametros','Parámetros'],['dropsadmin','Drops'],['usuarios','Usuarios']];
+  const nav = esAdmin?navAdmin:navUser;
+
+  return <div>
+    <Doodles/>
+    <div className="topbar"><div className="wrap">
+      <div className="brand"><Logo/><span className="nm">ReWear</span> {esAdmin&&<span className="tag r-Epico" style={{fontFamily:'var(--sans)'}}>admin</span>}</div>
+      <div className="nav">
+        {nav.map(([k,l])=><button key={k} className={view===k?'on':''} onClick={()=>setView(k)}>{l}</button>)}
+        {!esAdmin&&saldo!=null&&<span className="saldo"><Coin/>{saldo}</span>}
+        <button className="salir" onClick={salir}>Salir</button>
+      </div>
+    </div></div>
+
+    <div style={{padding:'22px 0 60px'}}>
+      {!cat? <div className="wrap"><p className="muted">Cargando...</p></div> : <React.Fragment>
+        {/* usuario */}
+        {!esAdmin&&view==='panel'&&<Panel ir={setView}/>}
+        {!esAdmin&&view==='catalogo'&&<Catalogo cat={cat} abrir={setDetalle} cmp={cmp} toggleCmp={toggleCmp}/>}
+        {!esAdmin&&view==='drops'&&<Drops abrir={setDetalle}/>}
+        {!esAdmin&&view==='entregar'&&<Entregar cat={cat}/>}
+        {!esAdmin&&view==='misprendas'&&<MisPrendas/>}
+        {!esAdmin&&view==='reservas'&&<MisReservas/>}
+        {!esAdmin&&view==='ventas'&&<Ventas/>}
+        {!esAdmin&&view==='billetera'&&<Billetera/>}
+        {/* admin */}
+        {esAdmin&&view==='validacion'&&<AdminValidacion cat={cat}/>}
+        {esAdmin&&view==='registrar'&&<AdminRegistrar cat={cat}/>}
+        {esAdmin&&view==='parametros'&&<AdminParametros cat={cat} recargar={recargarCat}/>}
+        {esAdmin&&view==='dropsadmin'&&<AdminDrops cat={cat}/>}
+        {esAdmin&&view==='usuarios'&&<AdminUsuarios/>}
+      </React.Fragment>}
+    </div>
+
+    {detalle&&<Detalle id={detalle} cerrar={()=>setDetalle(null)} onReservado={()=>{refrescarSaldo();}}/>}
+    {verCmp&&<Comparar items={cmp} cerrar={()=>setVerCmp(false)}/>}
+    {!esAdmin&&cmp.length>0&&<div className="cmpbar">Comparar ({cmp.length}) <button className="btn p sm" disabled={cmp.length<2} onClick={()=>setVerCmp(true)}>Ver</button><button className="btn ghost sm" style={{color:'#fff'}} onClick={()=>setCmp([])}>Limpiar</button></div>}
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
